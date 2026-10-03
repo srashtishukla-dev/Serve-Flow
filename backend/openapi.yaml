@@ -1,0 +1,509 @@
+openapi: 3.1.0
+info:
+  title: ServeFlow API
+  version: 1.0.0
+  description: Existing ServeFlow REST API. Organization ownership is derived from the authenticated JWT, never from request query parameters.
+servers:
+  - url: http://localhost:8080/api/v1
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      security: []
+      summary: Check API and dependency health
+      responses:
+        "200":
+          description: Health status (database/cache dependency fields are included by the running server).
+  /auth/register:
+    post:
+      security: []
+      summary: Register a user and workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Registration"
+      responses:
+        "201":
+          description: Account created; welcome email is queued when the configured worker is enabled.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /auth/login:
+    post:
+      security: []
+      summary: Authenticate and issue a JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Login"
+      responses:
+        "200":
+          description: JWT and authenticated user.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /me:
+    get:
+      summary: Get the authenticated account
+      responses:
+        "200":
+          description: Current user.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /organization:
+    get:
+      summary: Get the authenticated organization
+      responses:
+        "200":
+          description: Current organization.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /services:
+    get:
+      summary: List the organization's services
+      responses:
+        "200":
+          description: Service list.
+    post:
+      summary: Create a service
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "201":
+          description: Created service.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /services/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      summary: Get a service
+      responses:
+        "200":
+          description: Service.
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Update a service
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "200":
+          description: Updated service.
+    delete:
+      summary: Delete a service
+      responses:
+        "204":
+          description: Deleted.
+  /customers:
+    get:
+      summary: List customers
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/search"
+        - $ref: "#/components/parameters/sort"
+        - $ref: "#/components/parameters/order"
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    post:
+      summary: Create a customer
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "201":
+          description: Created customer.
+  /customers/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      summary: Get a customer
+      responses:
+        "200":
+          description: Customer.
+    put:
+      summary: Update a customer
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "200":
+          description: Updated customer.
+    delete:
+      summary: Delete a customer
+      responses:
+        "204":
+          description: Deleted.
+  /bookings:
+    get:
+      summary: List bookings
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/search"
+        - $ref: "#/components/parameters/status"
+        - $ref: "#/components/parameters/sort"
+        - $ref: "#/components/parameters/order"
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedList"
+    post:
+      summary: Create a booking
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "201":
+          description: Created booking.
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /bookings/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      summary: Get a booking
+      responses:
+        "200":
+          description: Booking.
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Update a booking
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "200":
+          description: Updated booking.
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      summary: Cancel a booking
+      responses:
+        "204":
+          description: Cancelled.
+  /appointments:
+    get:
+      summary: List appointments
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/search"
+        - $ref: "#/components/parameters/status"
+        - $ref: "#/components/parameters/sort"
+        - $ref: "#/components/parameters/order"
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedList"
+    post:
+      summary: Create an appointment and queue its notification/email event
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "201":
+          description: Created appointment.
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /appointments/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      summary: Get an appointment
+      responses:
+        "200":
+          description: Appointment.
+    put:
+      summary: Update an appointment
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "200":
+          description: Updated appointment.
+    delete:
+      summary: Cancel an appointment
+      responses:
+        "204":
+          description: Cancelled.
+  /technicians:
+    get:
+      summary: List technicians
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/search"
+        - $ref: "#/components/parameters/status"
+        - $ref: "#/components/parameters/sort"
+        - $ref: "#/components/parameters/order"
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedList"
+    post:
+      summary: Create a technician
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "201":
+          description: Created technician.
+  /technicians/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      summary: Get a technician
+      responses:
+        "200":
+          description: Technician.
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Update a technician
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "200":
+          description: Updated technician.
+    delete:
+      summary: Deactivate a technician
+      responses:
+        "204":
+          description: Deactivated.
+  /invoices:
+    get:
+      summary: List invoices
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/search"
+        - $ref: "#/components/parameters/status"
+        - $ref: "#/components/parameters/sort"
+        - $ref: "#/components/parameters/order"
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedList"
+    post:
+      summary: Create an invoice and queue its notification/email event
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "201":
+          description: Created invoice.
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /invoices/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      summary: Get invoice details
+      responses:
+        "200":
+          description: Invoice, items, and payments.
+    put:
+      summary: Update an invoice
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "200":
+          description: Updated invoice.
+    delete:
+      summary: Cancel an invoice
+      responses:
+        "204":
+          description: Cancelled.
+  /invoices/{id}/payments:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    post:
+      summary: Record a payment and queue its notification/email event
+      requestBody:
+        $ref: "#/components/requestBodies/JSON"
+      responses:
+        "201":
+          description: Recorded payment and updated invoice.
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /notifications:
+    get:
+      summary: List the authenticated user's notifications
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/search"
+        - name: is_read
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/PaginatedList"
+  /notifications/{id}/read:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    put:
+      summary: Mark a notification read
+      responses:
+        "200":
+          description: Updated notification.
+  /analytics/summary:
+    get:
+      summary: Get organization-scoped analytics
+      responses:
+        "200":
+          description: Analytics summary.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    search:
+      name: search
+      in: query
+      schema:
+        type: string
+        maxLength: 100
+    status:
+      name: status
+      in: query
+      schema:
+        type: string
+    sort:
+      name: sort
+      in: query
+      schema:
+        type: string
+        description: Must be one of the sortable fields supported by the resource.
+    order:
+      name: order
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+  requestBodies:
+    JSON:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+  schemas:
+    Registration:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    Login:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+  responses:
+    BadRequest:
+      description: Invalid input.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Authentication required or token invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Resource not found in the authenticated organization.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: Business-rule or uniqueness conflict.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    RateLimited:
+      description: Rate limit exceeded.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    PaginatedList:
+      description: Resource list with pagination metadata. The resource property name is endpoint-specific.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              pagination:
+                $ref: "#/components/schemas/Pagination"
