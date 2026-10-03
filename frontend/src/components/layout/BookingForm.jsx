@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import Button from '../ui/Button'
 
-export default function BookingForm({ initialValues, customers, services, error, saving, onCancel, onSubmit }) {
+export default function BookingForm({ initialValues, customers, services, technicians = [], appointmentMode = false, error, saving, onCancel, onSubmit }) {
   const [values, setValues] = useState({
     customerId: initialValues.customer_id || '',
     serviceId: initialValues.service_id || '',
+    technicianId: initialValues.technician_id || '',
     bookingDate: initialValues.booking_date || '',
     startTime: initialValues.start_time || '',
     endTime: initialValues.end_time || '',
     notes: initialValues.notes || '',
+    status: initialValues.status || 'BOOKED',
   })
   const [errors, setErrors] = useState({})
 
@@ -23,6 +25,7 @@ export default function BookingForm({ initialValues, customers, services, error,
     const nextErrors = {}
     if (!customers.some((customer) => customer.id === values.customerId)) nextErrors.customerId = 'Select a customer.'
     if (!services.some((service) => service.id === values.serviceId)) nextErrors.serviceId = 'Select a service.'
+    if (appointmentMode && values.technicianId && !technicians.some((technician) => technician.id === values.technicianId)) nextErrors.technicianId = 'Select an available technician.'
     if (!/^\d{4}-\d{2}-\d{2}$/.test(values.bookingDate)) nextErrors.bookingDate = 'Select a valid booking date.'
     if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(values.startTime)) nextErrors.startTime = 'Select a valid start time.'
     if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(values.endTime)) nextErrors.endTime = 'Select a valid end time.'
@@ -31,14 +34,17 @@ export default function BookingForm({ initialValues, customers, services, error,
 
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length === 0) {
-      onSubmit({
+      const payload = {
         customer_id: values.customerId,
         service_id: values.serviceId,
-        booking_date: values.bookingDate,
+        technician_id: appointmentMode ? values.technicianId : undefined,
+        [appointmentMode ? 'appointment_date' : 'booking_date']: values.bookingDate,
         start_time: values.startTime,
         end_time: values.endTime,
         notes: values.notes.trim(),
-      })
+      }
+      if (appointmentMode && initialValues.id) payload.status = values.status
+      onSubmit(payload)
     }
   }
 
@@ -52,8 +58,16 @@ export default function BookingForm({ initialValues, customers, services, error,
         <option value="">Select a service</option>
         {services.map((service) => <option key={service.id} value={service.id}>{service.name}</option>)}
       </SelectField>
+      {appointmentMode && (
+        <SelectField error={errors.technicianId} id="appointment-technician" label="Technician (optional)" name="technicianId" onChange={updateField} value={values.technicianId}>
+          <option value="">No technician assigned</option>
+          {technicians.filter((technician) => technician.status === 'ACTIVE' || technician.id === values.technicianId).map((technician) => (
+            <option key={technician.id} value={technician.id}>{technician.name}{technician.status === 'INACTIVE' ? ' (inactive)' : ''}</option>
+          ))}
+        </SelectField>
+      )}
       <div className="booking-form__row">
-        <InputField error={errors.bookingDate} id="booking-date" label="Date" name="bookingDate" onChange={updateField} type="date" value={values.bookingDate} />
+        <InputField error={errors.bookingDate} id="booking-date" label={appointmentMode ? 'Appointment date' : 'Date'} name="bookingDate" onChange={updateField} type="date" value={values.bookingDate} />
         <InputField error={errors.startTime} id="booking-start-time" label="Start time" name="startTime" onChange={updateField} type="time" value={values.startTime} />
         <InputField error={errors.endTime} id="booking-end-time" label="End time" name="endTime" onChange={updateField} type="time" value={values.endTime} />
       </div>
@@ -72,10 +86,17 @@ export default function BookingForm({ initialValues, customers, services, error,
         />
         {errors.notes && <span className="form-field__error" id="booking-notes-error">{errors.notes}</span>}
       </div>
+      {appointmentMode && initialValues.id && (
+        <SelectField id="appointment-status" label="Status" name="status" onChange={updateField} value={values.status}>
+          <option value="BOOKED">BOOKED</option>
+          <option value="COMPLETED">COMPLETED</option>
+          <option value="CANCELLED">CANCELLED</option>
+        </SelectField>
+      )}
       {error && <p className="auth-notice auth-notice--error" role="alert">{error}</p>}
       <footer className="services-modal__actions">
         <button className="button button--outline" onClick={onCancel} type="button">Cancel</button>
-        <Button disabled={saving} type="submit">{saving ? 'Saving...' : 'Save booking'}</Button>
+        <Button disabled={saving} type="submit">{saving ? 'Saving...' : initialValues.id ? appointmentMode ? 'Update appointment' : 'Save booking' : appointmentMode ? 'Create appointment' : 'Save booking'}</Button>
       </footer>
     </form>
   )
