@@ -58,7 +58,7 @@ The following screenshots show the current ServeFlow application interface and i
 
 | Login                                | Registration                                       |
 | ------------------------------------ | -------------------------------------------------- |
-| ![Login](Docs/Screenshots/Login.png) | ![Registration](Docs/Screenshots/Registration.png) |
+| ![Login](Docs/Screenshots/Login.png) | ![Registration](Docs/Screenshots/Registeration.png) |
 
 ---
 
@@ -70,7 +70,7 @@ The following screenshots show the current ServeFlow application interface and i
 
 ## 📅 Booking Management
 
-![Booking Management](Docs/Screenshots/Booking.png)
+![Booking Management](Docs/Screenshots/Bookings.png)
 
 ---
 
