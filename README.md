@@ -6,7 +6,7 @@ ServeFlow is a **production-style, multi-tenant service management platform** bu
 
 The platform is designed to help service-based organizations manage their complete operational workflow — including **customers, services, bookings, appointments, technicians, invoices, payments, notifications, and analytics** — through a secure and structured full-stack application.
 
-> 🚧 **Project status:** Actively developed and continuously improved.
+> 🚧 **Project Status:** Actively developed and continuously improved.
 
 ---
 
@@ -14,7 +14,7 @@ The platform is designed to help service-based organizations manage their comple
 
 ServeFlow brings common service-management workflows into a single platform.
 
-### Core capabilities
+### Core Capabilities
 
 * 🔐 JWT-based authentication
 * 🏢 Organization-based multi-tenancy
@@ -34,26 +34,78 @@ ServeFlow brings common service-management workflows into a single platform.
 
 ---
 
-## 🏗️ Architecture
+# 📸 Application Showcase
+
+The following screenshots show the current ServeFlow application interface and implemented workflows.
+
+## 🏠 Home Page
+
+![ServeFlow Home Page](docs/screenshots/home.png)
+
+---
+
+## ✨ Home Page Views
+
+| Home View 1                                | Home View 2                                |
+| ------------------------------------------ | ------------------------------------------ |
+| ![Home View 1](docs/screenshots/home1.png) | ![Home View 2](docs/screenshots/home2.png) |
+
+![Home View 3](docs/screenshots/home3.png)
+
+---
+
+## 🔐 Authentication
+
+| Login                                | Registration                                       |
+| ------------------------------------ | -------------------------------------------------- |
+| ![Login](docs/screenshots/login.png) | ![Registration](docs/screenshots/registration.png) |
+
+---
+
+## 📊 Dashboard
+
+![ServeFlow Dashboard](docs/screenshots/dashboard.png)
+
+---
+
+## 📅 Booking Management
+
+![Booking Management](docs/screenshots/booking.png)
+
+---
+
+## 💰 Invoice Management
+
+![Invoice Management](docs/screenshots/invoice.png)
+
+---
+
+## 📈 Analytics
+
+![ServeFlow Analytics](docs/screenshots/analytics.png)
+
+---
+
+# 🏗️ Architecture
 
 ```text
                     ┌──────────────────────┐
-                    │    React Frontend   │
-                    │   Vite + Router     │
+                    │    React Frontend    │
+                    │    Vite + Router     │
                     └──────────┬───────────┘
                                │
                                │ REST / JSON
                                ▼
                     ┌──────────────────────┐
-                    │      Go REST API    │
-                    │     net/http + pgx  │
+                    │      Go REST API     │
+                    │    net/http + pgx    │
                     └───────┬───────┬──────┘
                             │       │
                  ┌──────────┘       └──────────┐
                  ▼                             ▼
         ┌─────────────────┐           ┌─────────────────┐
         │   PostgreSQL    │           │      Redis      │
-        │ Source of Truth │           │ Optional Cache  │
+        │ Source of Truth │           │  Optional Cache │
         └─────────────────┘           └─────────────────┘
                  │
                  ▼
@@ -65,13 +117,13 @@ ServeFlow brings common service-management workflows into a single platform.
 
 The application follows a monorepo structure with a React frontend and Go backend.
 
-PostgreSQL is the primary source of truth. Redis is used as an optional cache, while asynchronous background jobs handle notification and email-delivery workflows.
+PostgreSQL is the primary source of truth. Redis is used as an optional caching layer, while asynchronous background jobs handle notification and email-delivery workflows.
 
 ---
 
-## 🛠️ Technology Stack
+# 🛠️ Technology Stack
 
-### Frontend
+## Frontend
 
 * React
 * JavaScript
@@ -81,7 +133,7 @@ PostgreSQL is the primary source of truth. Redis is used as an optional cache, w
 * Lucide React
 * Axios
 
-### Backend
+## Backend
 
 * Go
 * `net/http`
@@ -90,14 +142,14 @@ PostgreSQL is the primary source of truth. Redis is used as an optional cache, w
 * JWT authentication
 * Middleware-based request handling
 
-### Database & Infrastructure
+## Database & Infrastructure
 
 * PostgreSQL
 * Redis
 * Docker
 * Docker Compose
 
-### Testing & Quality
+## Testing & Quality
 
 * Go tests
 * PostgreSQL integration tests
@@ -107,7 +159,7 @@ PostgreSQL is the primary source of truth. Redis is used as an optional cache, w
 * Frontend production build
 * OpenAPI validation
 
-### Development & CI
+## Development & CI
 
 * Git
 * GitHub
@@ -116,7 +168,7 @@ PostgreSQL is the primary source of truth. Redis is used as an optional cache, w
 
 ---
 
-## 🔐 Authentication & Security
+# 🔐 Authentication & Security
 
 ServeFlow uses JWT-based authentication with protected API routes.
 
@@ -136,7 +188,7 @@ JWT configuration is provided through environment variables and secrets are kept
 
 ---
 
-## 🏢 Multi-Tenant Architecture
+# 🏢 Multi-Tenant Architecture
 
 ServeFlow is designed around **organization-level data isolation**.
 
@@ -158,7 +210,7 @@ Cross-organization access is covered by backend integration tests.
 
 ---
 
-## 👥 Customer Management
+# 👥 Customer Management
 
 The customer module provides organization-scoped operations for:
 
@@ -178,7 +230,7 @@ Customer records support information such as:
 
 ---
 
-## 🛠️ Service Management
+# 🛠️ Service Management
 
 Organizations can manage their service catalog through protected APIs and frontend workflows.
 
@@ -196,7 +248,7 @@ Prices use exact decimal database handling rather than floating-point persistenc
 
 ---
 
-## 📅 Bookings & Appointments
+# 📅 Bookings & Appointments
 
 ServeFlow provides scheduling functionality built around organization-scoped bookings.
 
@@ -229,7 +281,7 @@ The appointment system extends the existing booking model rather than maintainin
 
 ---
 
-## 👨‍🔧 Technician Management
+# 👨‍🔧 Technician Management
 
 Technicians are organization-owned resources.
 
@@ -247,11 +299,11 @@ Technician-related workflows are covered by backend tests.
 
 ---
 
-## 💰 Invoices & Payments
+# 💰 Invoices & Payments
 
 ServeFlow includes organization-scoped invoicing and internal payment tracking.
 
-### Invoices
+## Invoices
 
 * Invoice creation
 * Invoice listing
@@ -262,7 +314,7 @@ ServeFlow includes organization-scoped invoicing and internal payment tracking.
 * Organization-unique invoice numbers
 * Outstanding invoice tracking
 
-### Payments
+## Payments
 
 The current implementation supports **internal/manual payment recording**.
 
@@ -277,7 +329,7 @@ It includes:
 
 ---
 
-## 🔔 Notifications & Email
+# 🔔 Notifications & Email
 
 ServeFlow includes an asynchronous notification workflow.
 
@@ -303,7 +355,7 @@ SMTP credentials remain in environment configuration and are not committed to th
 
 ---
 
-## 📊 Analytics
+# 📊 Analytics
 
 The backend includes organization-scoped analytics and dashboard aggregates.
 
@@ -311,11 +363,9 @@ Analytics are designed to provide operational visibility across the service-mana
 
 The current frontend includes an analytics page for the implemented analytics functionality.
 
-A larger dedicated visual administration dashboard is planned as a future enhancement.
-
 ---
 
-## ⚡ Redis
+# ⚡ Redis
 
 Redis is integrated as an **optional caching layer**.
 
@@ -325,31 +375,7 @@ Redis is managed locally through Docker Compose.
 
 ---
 
-## 🐳 Docker & Local Infrastructure
-
-Docker Compose is used for local infrastructure.
-
-Current services include:
-
-```text
-PostgreSQL
-Redis
-```
-
-The project also includes PowerShell scripts for starting and stopping the local development environment.
-
-Typical local ports:
-
-| Component  | Port |
-| ---------- | ---: |
-| PostgreSQL | 5433 |
-| Redis      | 6379 |
-| Go API     | 8080 |
-| React/Vite | 5173 |
-
----
-
-## 🧪 Testing & Quality
+# 🧪 Testing & Quality
 
 ServeFlow includes automated backend and frontend tests.
 
@@ -383,7 +409,7 @@ The root `test.ps1` script creates a disposable PostgreSQL test database so inte
 
 ---
 
-## 📖 API Documentation
+# 📖 API Documentation
 
 The backend API is documented using OpenAPI:
 
@@ -399,9 +425,33 @@ The API follows versioned routes such as:
 
 ---
 
-## 🔄 CI/CD
+# 🐳 Docker & Local Infrastructure
 
-The repository includes a GitHub Actions workflow:
+Docker Compose is used for local infrastructure.
+
+Current services include:
+
+```text
+PostgreSQL
+Redis
+```
+
+The project also includes PowerShell scripts for starting and stopping the local development environment.
+
+### Typical Local Ports
+
+| Component  | Port |
+| ---------- | ---: |
+| PostgreSQL | 5433 |
+| Redis      | 6379 |
+| Go API     | 8080 |
+| React/Vite | 5173 |
+
+---
+
+# 🔄 CI/CD
+
+The repository includes a GitHub Actions verification workflow:
 
 ```text
 .github/workflows/verify.yml
@@ -421,7 +471,7 @@ test.ps1
 
 ---
 
-## 📁 Project Structure
+# 📁 Project Structure
 
 ```text
 ServeFlow/
@@ -468,6 +518,19 @@ ServeFlow/
 │       ├── utils/
 │       └── __tests__/
 │
+├── docs/
+│   └── screenshots/
+│       ├── home.png
+│       ├── home1.png
+│       ├── home2.png
+│       ├── home3.png
+│       ├── login.png
+│       ├── registration.png
+│       ├── dashboard.png
+│       ├── booking.png
+│       ├── invoice.png
+│       └── analytics.png
+│
 ├── .github/
 │   └── workflows/
 │
@@ -481,9 +544,9 @@ ServeFlow/
 
 ---
 
-## 🚀 Local Development
+# 🚀 Local Development
 
-### Prerequisites
+## Prerequisites
 
 Install:
 
@@ -493,7 +556,7 @@ Install:
 * Docker Desktop
 * Git
 
-### 1. Configure environment
+## 1. Configure Environment
 
 Create a local environment file:
 
@@ -505,7 +568,7 @@ Edit `.env` and provide your local development values.
 
 **Never commit the real `.env` file.**
 
-### 2. Start the application
+## 2. Start the Application
 
 From the repository root:
 
@@ -515,19 +578,19 @@ From the repository root:
 
 This starts the local infrastructure, applies database migrations, starts the Go API, and starts the React development server.
 
-### 3. Stop the application
+## 3. Stop the Application
 
 ```powershell
 .\stop-dev.ps1
 ```
 
-### 4. Run tests
+## 4. Run Tests
 
 ```powershell
 .\test.ps1
 ```
 
-### 5. Build the frontend
+## 5. Build the Frontend
 
 ```powershell
 cd frontend
@@ -537,7 +600,7 @@ npm run build
 
 ---
 
-## ❤️ Why I Built ServeFlow
+# ❤️ Why I Built ServeFlow
 
 I wanted to build something beyond a basic CRUD application.
 
@@ -564,9 +627,9 @@ The project is being developed incrementally with an emphasis on **building, tes
 
 ---
 
-## 🗺️ Current Development Status
+# 🗺️ Current Development Status
 
-### Implemented
+## Implemented
 
 * React frontend
 * Go REST API
@@ -589,17 +652,17 @@ The project is being developed incrementally with an emphasis on **building, tes
 * OpenAPI documentation
 * GitHub Actions workflow
 
-### Future Improvements
+## Future Improvements
 
-* Dedicated comprehensive visual Admin Dashboard
 * External payment gateway integration
-* Additional customer/technician workflows
+* Additional customer and technician workflows
 * Further production hardening
 * Additional UI/UX refinement
+* Expanded reporting and analytics
 
 ---
 
-## 👩‍💻 Developer
+# 👩‍💻 Developer
 
 **Srashti Shukla**
 
@@ -612,3 +675,4 @@ Interested in:
 ---
 
 ⭐ **ServeFlow is an actively developed full-stack project focused on solving realistic service-management problems while applying production-oriented software engineering practices.**
+
