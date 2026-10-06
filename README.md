@@ -40,7 +40,7 @@ The following screenshots show the current ServeFlow application interface and i
 
 ## 🏠 Home Page
 
-![ServeFlow Home Page](docs/screenshots/home.png)
+![ServeFlow Home Page](Docs/Screenshots/Home.png)
 
 ---
 
@@ -48,9 +48,9 @@ The following screenshots show the current ServeFlow application interface and i
 
 | Home View 1                                | Home View 2                                |
 | ------------------------------------------ | ------------------------------------------ |
-| ![Home View 1](docs/screenshots/home1.png) | ![Home View 2](docs/screenshots/home2.png) |
+| ![Home View 1](Docs/Screenshots/Home1.png) | ![Home View 2](Docs/Screenshots/Home2.png) |
 
-![Home View 3](docs/screenshots/home3.png)
+![Home View 3](Docs/Screenshots/Home3.png)
 
 ---
 
@@ -58,31 +58,31 @@ The following screenshots show the current ServeFlow application interface and i
 
 | Login                                | Registration                                       |
 | ------------------------------------ | -------------------------------------------------- |
-| ![Login](docs/screenshots/login.png) | ![Registration](docs/screenshots/registration.png) |
+| ![Login](Docs/Screenshots/Login.png) | ![Registration](Docs/Screenshots/Registration.png) |
 
 ---
 
 ## 📊 Dashboard
 
-![ServeFlow Dashboard](docs/screenshots/dashboard.png)
+![ServeFlow Dashboard](Docs/Screenshots/Dashboard.png)
 
 ---
 
 ## 📅 Booking Management
 
-![Booking Management](docs/screenshots/booking.png)
+![Booking Management](Docs/Screenshots/Booking.png)
 
 ---
 
 ## 💰 Invoice Management
 
-![Invoice Management](docs/screenshots/invoice.png)
+![Invoice Management](Docs/Screenshots/Invoice.png)
 
 ---
 
 ## 📈 Analytics
 
-![ServeFlow Analytics](docs/screenshots/analytics.png)
+![ServeFlow Analytics](Docs/Screenshots/Analytics.png)
 
 ---
 
