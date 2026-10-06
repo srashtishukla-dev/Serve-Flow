@@ -1,5 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import App from '../App'
+import AppointmentDetails from '../pages/AppointmentDetails'
+import Analytics from '../pages/Analytics'
 import Bookings from '../pages/Bookings'
 import ComingSoon from '../pages/ComingSoon'
 import Customers from '../pages/Customers'
@@ -14,6 +16,8 @@ import Services from '../pages/Services'
 import Technicians from '../pages/Technicians'
 import RequireAuth from '../components/layout/RequireAuth'
 
+const adminRoles = ['ADMIN']
+
 const upcomingPaths = [
   '/tickets',
   '/settings',
@@ -27,13 +31,14 @@ export const router = createBrowserRouter([
       { path: '/login', element: <Login /> },
       { path: '/register', element: <Register /> },
       { path: '/dashboard', element: <RequireAuth><Dashboard /></RequireAuth> },
-      { path: '/analytics', element: <RequireAuth><Dashboard /></RequireAuth> },
-      { path: '/services', element: <RequireAuth><Services /></RequireAuth> },
-      { path: '/customers', element: <RequireAuth><Customers /></RequireAuth> },
-      { path: '/bookings', element: <RequireAuth><Bookings /></RequireAuth> },
+      { path: '/analytics', element: <RequireAuth roles={adminRoles}><Analytics /></RequireAuth> },
+      { path: '/services', element: <RequireAuth roles={adminRoles}><Services /></RequireAuth> },
+      { path: '/customers', element: <RequireAuth roles={adminRoles}><Customers /></RequireAuth> },
+      { path: '/bookings', element: <RequireAuth roles={adminRoles}><Bookings /></RequireAuth> },
       { path: '/appointments', element: <RequireAuth><Bookings appointments /></RequireAuth> },
-      { path: '/technicians', element: <RequireAuth><Technicians /></RequireAuth> },
-      { path: '/invoices', element: <RequireAuth><Invoices /></RequireAuth> },
+      { path: '/appointments/:id', element: <RequireAuth><AppointmentDetails /></RequireAuth> },
+      { path: '/technicians', element: <RequireAuth roles={adminRoles}><Technicians /></RequireAuth> },
+      { path: '/invoices', element: <RequireAuth roles={['ADMIN', 'CUSTOMER']}><Invoices /></RequireAuth> },
       { path: '/notifications', element: <RequireAuth><Notifications /></RequireAuth> },
       { path: '/404', element: <NotFound /> },
       ...upcomingPaths.map((path) => ({

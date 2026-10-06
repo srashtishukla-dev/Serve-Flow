@@ -1,0 +1,1678 @@
+openapi: 3.1.0
+info:
+  title: ServeFlow API
+  version: 1.0.0
+  description: Existing ServeFlow REST API. Organization ownership is derived from the authenticated JWT, never from request query parameters.
+servers:
+  - url: http://localhost:8080/api/v1
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      operationId: healthCheck
+      security: []
+      summary: Check API and dependency health
+      responses:
+        "200":
+          description: Health and dependency status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /auth/register:
+    post:
+      operationId: register
+      security: []
+      summary: Register a user and workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Registration"
+      responses:
+        "201":
+          description: Account created; welcome email is queued when the configured worker is enabled.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegistrationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /auth/login:
+    post:
+      operationId: login
+      security: []
+      summary: Authenticate and issue a JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Login"
+      responses:
+        "200":
+          description: JWT and authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /me:
+    get:
+      operationId: getMe
+      summary: Get the authenticated account
+      responses:
+        "200":
+          description: Current user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /organization:
+    get:
+      operationId: getOrganization
+      summary: Get the authenticated organization
+      responses:
+        "200":
+          description: Current organization.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /services:
+    get:
+      operationId: listServices
+      summary: List the organization's services
+      description: Results are ordered newest first; this endpoint does not use list pagination parameters.
+      responses:
+        "200":
+          description: Service list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServicesResponse"
+    post:
+      operationId: createService
+      summary: Create a service
+      requestBody:
+        $ref: "#/components/requestBodies/Service"
+      responses:
+        "201":
+          description: Created service.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /services/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      operationId: getService
+      summary: Get a service
+      responses:
+        "200":
+          description: Service.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      operationId: updateService
+      summary: Update a service
+      requestBody:
+        $ref: "#/components/requestBodies/Service"
+      responses:
+        "200":
+          description: Updated service.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteService
+      summary: Delete a service
+      responses:
+        "204":
+          description: Deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /customers:
+    get:
+      operationId: listCustomers
+      summary: List customers
+      description: "Defaults to page 1, 20 items, sorted by created_at descending. Sort fields: created_at, updated_at, name."
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/search"
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [created_at, updated_at, name]
+        - $ref: "#/components/parameters/order"
+      responses:
+        "200":
+          $ref: "#/components/responses/CustomerList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createCustomer
+      summary: Create a customer
+      requestBody:
+        $ref: "#/components/requestBodies/Customer"
+      responses:
+        "201":
+          description: Created customer.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /customers/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      operationId: getCustomer
+      summary: Get a customer
+      responses:
+        "200":
+          description: Customer.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      operationId: updateCustomer
+      summary: Update a customer
+      requestBody:
+        $ref: "#/components/requestBodies/Customer"
+      responses:
+        "200":
+          description: Updated customer.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteCustomer
+      summary: Delete a customer
+      responses:
+        "204":
+          description: Deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /bookings:
+    get:
+      operationId: listBookings
+      summary: List bookings
+      description: "Defaults to page 1, 20 items, sorted by booking_date ascending. Sort fields: booking_date, created_at, status."
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/search"
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [BOOKED, CANCELLED, COMPLETED]
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [booking_date, created_at, status]
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        "200":
+          $ref: "#/components/responses/BookingList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createBooking
+      summary: Create a booking
+      requestBody:
+        $ref: "#/components/requestBodies/Booking"
+      responses:
+        "201":
+          description: Created booking.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookingResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /bookings/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      operationId: getBooking
+      summary: Get a booking
+      responses:
+        "200":
+          description: Booking.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookingResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      operationId: updateBooking
+      summary: Update a booking
+      requestBody:
+        $ref: "#/components/requestBodies/BookingUpdate"
+      responses:
+        "200":
+          description: Updated booking.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookingResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      operationId: cancelBooking
+      summary: Cancel a booking
+      responses:
+        "204":
+          description: Cancelled.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /appointments:
+    get:
+      operationId: listAppointments
+      summary: List appointments
+      description: "Defaults to page 1, 20 items, sorted by booking_date ascending. Sort fields: booking_date, created_at, status."
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/search"
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [BOOKED, CANCELLED, COMPLETED]
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [booking_date, created_at, status]
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        "200":
+          $ref: "#/components/responses/AppointmentList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createAppointment
+      summary: Create an appointment and queue its notification/email event
+      requestBody:
+        $ref: "#/components/requestBodies/Appointment"
+      responses:
+        "201":
+          description: Created appointment.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /appointments/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      operationId: getAppointment
+      summary: Get an appointment
+      responses:
+        "200":
+          description: Appointment.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      operationId: updateAppointment
+      summary: Update an appointment
+      requestBody:
+        $ref: "#/components/requestBodies/AppointmentUpdate"
+      responses:
+        "200":
+          description: Updated appointment.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    delete:
+      operationId: cancelAppointment
+      summary: Cancel an appointment
+      responses:
+        "204":
+          description: Cancelled.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /technicians:
+    get:
+      operationId: listTechnicians
+      summary: List technicians
+      description: "Defaults to page 1, 20 items, sorted by created_at descending. Sort fields: created_at, updated_at, name, status."
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/search"
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE]
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [created_at, updated_at, name, status]
+        - $ref: "#/components/parameters/order"
+      responses:
+        "200":
+          $ref: "#/components/responses/TechnicianList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createTechnician
+      summary: Create a technician
+      requestBody:
+        $ref: "#/components/requestBodies/Technician"
+      responses:
+        "201":
+          description: Created technician.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TechnicianResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /technicians/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      operationId: getTechnician
+      summary: Get a technician
+      responses:
+        "200":
+          description: Technician.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TechnicianResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      operationId: updateTechnician
+      summary: Update a technician
+      requestBody:
+        $ref: "#/components/requestBodies/Technician"
+      responses:
+        "200":
+          description: Updated technician.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TechnicianResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    delete:
+      operationId: deactivateTechnician
+      summary: Deactivate a technician
+      responses:
+        "204":
+          description: Deactivated.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /invoices:
+    get:
+      operationId: listInvoices
+      summary: List invoices
+      description: "Administrators see invoices in their organization; customers see only invoices linked to their authenticated customer profile. Organization and customer scope are derived from the authenticated identity. Defaults to page 1, 20 items, sorted by issue_date descending. Sort fields: issue_date, due_date, total, status, created_at."
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/search"
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, ISSUED, PARTIALLY_PAID, PAID, CANCELLED]
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [issue_date, due_date, total, status, created_at]
+        - $ref: "#/components/parameters/order"
+      responses:
+        "200":
+          $ref: "#/components/responses/InvoiceList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The account is not an administrator or a linked customer.
+    post:
+      operationId: createInvoice
+      summary: Create an invoice and queue its notification/email event
+      requestBody:
+        $ref: "#/components/requestBodies/Invoice"
+      responses:
+        "201":
+          description: Created invoice.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /invoices/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      operationId: getInvoice
+      summary: Get invoice details
+      description: Administrators can view invoices in their organization. Customers can view only invoices belonging to their linked customer profile.
+      responses:
+        "200":
+          description: Invoice, items, and payments.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceDetails"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "403":
+          description: The account is not an administrator or a linked customer.
+    put:
+      operationId: updateInvoice
+      summary: Update an invoice
+      requestBody:
+        $ref: "#/components/requestBodies/Invoice"
+      responses:
+        "200":
+          description: Updated invoice.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      operationId: cancelInvoice
+      summary: Cancel an invoice
+      responses:
+        "204":
+          description: Cancelled.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /invoices/{id}/payments:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    post:
+      operationId: recordPayment
+      summary: Record a payment and queue its notification/email event
+      requestBody:
+        $ref: "#/components/requestBodies/Payment"
+      responses:
+        "201":
+          description: Recorded payment and updated invoice.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /notifications:
+    get:
+      operationId: listNotifications
+      summary: List the authenticated user's notifications
+      description: Defaults to page 1, 20 items, sorted by created_at descending. Search matches title and message.
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/search"
+        - name: is_read
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/NotificationList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /notifications/{id}/read:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    put:
+      operationId: markNotificationRead
+      summary: Mark a notification read
+      responses:
+        "200":
+          description: Updated notification.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /analytics/summary:
+    get:
+      operationId: getAnalyticsSummary
+      summary: Get organization-scoped analytics
+      responses:
+        "200":
+          description: Analytics summary.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsSummary"
+  /analytics/activity:
+    get:
+      operationId: getAnalyticsActivity
+      summary: Get organization-scoped daily activity for a date range
+      parameters:
+        - name: range
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [today, last_7_days, last_30_days, current_month]
+            default: last_30_days
+      responses:
+        "200":
+          description: Daily appointment and revenue activity.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsActivity"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    page:
+      name: page
+      in: query
+      description: Page number, from 1 through 1,000,000.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000000
+        default: 1
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    search:
+      name: search
+      in: query
+      schema:
+        type: string
+        maxLength: 100
+    order:
+      name: order
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+  requestBodies:
+    Service:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ServiceInput"
+    Customer:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CustomerInput"
+    Booking:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BookingInput"
+    BookingUpdate:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BookingUpdate"
+    Appointment:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AppointmentInput"
+    AppointmentUpdate:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AppointmentUpdate"
+    Technician:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TechnicianInput"
+    Invoice:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/InvoiceInput"
+    Payment:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PaymentInput"
+  schemas:
+    Registration:
+      type: object
+      required: [name, email, password]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          description: Must contain 8 to 72 UTF-8 bytes.
+    Login:
+      type: object
+      required: [email, password]
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    ServiceInput:
+      type: object
+      required: [name, duration_minutes, price]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 2000
+        duration_minutes:
+          type: integer
+          minimum: 1
+        price:
+          oneOf:
+            - type: number
+              minimum: 0
+              multipleOf: 0.01
+            - type: string
+              pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+    CustomerInput:
+      type: object
+      required: [name]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        email:
+          anyOf:
+            - type: string
+              const: ""
+            - type: string
+              format: email
+              maxLength: 254
+        phone:
+          type: string
+          maxLength: 50
+        notes:
+          type: string
+          maxLength: 2000
+    BookingInput:
+      type: object
+      required: [customer_id, service_id, booking_date, start_time, end_time]
+      unevaluatedProperties: false
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        service_id:
+          type: string
+          format: uuid
+        technician_id:
+          type: string
+          format: uuid
+        booking_date:
+          type: string
+          format: date
+          description: Local business date; no timezone is accepted.
+        start_time:
+          type: string
+          pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+          description: Local 24-hour time in HH:MM format.
+        end_time:
+          type: string
+          pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+          description: Local 24-hour time in HH:MM format, later than start_time.
+        notes:
+          type: string
+          maxLength: 2000
+    BookingUpdate:
+      allOf:
+        - $ref: "#/components/schemas/BookingInput"
+        - type: object
+          properties:
+            status:
+              type: string
+              enum: [BOOKED, CANCELLED, COMPLETED]
+    AppointmentInput:
+      type: object
+      required: [customer_id, service_id, appointment_date, start_time, end_time]
+      unevaluatedProperties: false
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        service_id:
+          type: string
+          format: uuid
+        technician_id:
+          type: string
+          format: uuid
+        appointment_date:
+          type: string
+          format: date
+          description: Local business date; no timezone is accepted.
+        start_time:
+          type: string
+          pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+          description: Local 24-hour time in HH:MM format.
+        end_time:
+          type: string
+          pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+          description: Local 24-hour time in HH:MM format, later than start_time.
+        notes:
+          type: string
+          maxLength: 2000
+    AppointmentUpdate:
+      allOf:
+        - $ref: "#/components/schemas/AppointmentInput"
+        - type: object
+          properties:
+            status:
+              type: string
+              enum: [BOOKED, CANCELLED, COMPLETED]
+    TechnicianInput:
+      type: object
+      required: [name]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        email:
+          anyOf:
+            - type: string
+              const: ""
+            - type: string
+              format: email
+              maxLength: 254
+        phone:
+          type: string
+          maxLength: 50
+    InvoiceInput:
+      type: object
+      required: [customer_id, issue_date, due_date, items]
+      additionalProperties: false
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        appointment_id:
+          type: string
+          format: uuid
+        issue_date:
+          type: string
+          format: date
+        due_date:
+          type: string
+          format: date
+        items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/InvoiceItemInput"
+        tax:
+          $ref: "#/components/schemas/MoneyInput"
+        notes:
+          type: string
+          maxLength: 2000
+    InvoiceItemInput:
+      type: object
+      required: [description, quantity, unit_price]
+      additionalProperties: false
+      properties:
+        description:
+          type: string
+          minLength: 1
+          maxLength: 200
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 1000000
+        unit_price:
+          $ref: "#/components/schemas/MoneyInput"
+    PaymentInput:
+      type: object
+      required: [amount, payment_date, payment_method]
+      additionalProperties: false
+      properties:
+        amount:
+          oneOf:
+            - type: number
+              exclusiveMinimum: 0
+              multipleOf: 0.01
+            - type: string
+              pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+        payment_date:
+          type: string
+          format: date
+        payment_method:
+          type: string
+          enum: [CASH, CARD, UPI, BANK_TRANSFER, OTHER]
+        reference:
+          type: string
+          maxLength: 120
+        notes:
+          type: string
+          maxLength: 1000
+    MoneyInput:
+      oneOf:
+        - type: number
+          minimum: 0
+          multipleOf: 0.01
+        - type: string
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+    Health:
+      type: object
+      required: [status, service, dependencies]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        service:
+          type: string
+          const: serveflow-api
+        dependencies:
+          type: object
+          required: [database, cache]
+          properties:
+            database:
+              type: string
+              enum: [available, unavailable, disabled]
+            cache:
+              type: string
+              enum: [available, unavailable, disabled]
+    User:
+      type: object
+      required: [id, name, email]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+    Organization:
+      type: object
+      required: [id, name, slug]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+    RegistrationResponse:
+      type: object
+      required: [message, user]
+      properties:
+        message:
+          type: string
+          const: registration successful
+        user:
+          $ref: "#/components/schemas/User"
+    LoginResponse:
+      type: object
+      required: [message, token, user]
+      properties:
+        message:
+          type: string
+          const: login successful
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+    Service:
+      type: object
+      required: [id, name, description, duration_minutes, price]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        duration_minutes:
+          type: integer
+        price:
+          type: number
+    ServiceResponse:
+      type: object
+      required: [service]
+      properties:
+        service:
+          $ref: "#/components/schemas/Service"
+    ServicesResponse:
+      type: object
+      required: [services]
+      properties:
+        services:
+          type: array
+          items:
+            $ref: "#/components/schemas/Service"
+    Customer:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        notes:
+          type: string
+    CustomerResponse:
+      type: object
+      required: [customer]
+      properties:
+        customer:
+          $ref: "#/components/schemas/Customer"
+    Booking:
+      allOf:
+        - $ref: "#/components/schemas/BookingInput"
+        - type: object
+          required: [id, status]
+          properties:
+            id:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum: [BOOKED, CANCELLED, COMPLETED]
+    BookingResponse:
+      type: object
+      required: [booking]
+      properties:
+        booking:
+          $ref: "#/components/schemas/Booking"
+    Appointment:
+      allOf:
+        - $ref: "#/components/schemas/AppointmentInput"
+        - type: object
+          required: [id, status]
+          properties:
+            id:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum: [BOOKED, CANCELLED, COMPLETED]
+    AppointmentResponse:
+      type: object
+      required: [appointment]
+      properties:
+        appointment:
+          $ref: "#/components/schemas/Appointment"
+    Technician:
+      type: object
+      required: [id, organization_id, name, status, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    TechnicianResponse:
+      type: object
+      required: [technician]
+      properties:
+        technician:
+          $ref: "#/components/schemas/Technician"
+    Invoice:
+      type: object
+      required: [id, invoice_number, customer_id, status, issue_date, due_date, subtotal, tax, total, amount_paid, balance_due, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        invoice_number:
+          type: string
+        customer_id:
+          type: string
+          format: uuid
+        customer_name:
+          type: string
+        appointment_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [DRAFT, ISSUED, PARTIALLY_PAID, PAID, CANCELLED]
+        issue_date:
+          type: string
+          format: date
+        due_date:
+          type: string
+          format: date
+        subtotal:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        amount_paid:
+          type: number
+        balance_due:
+          type: number
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    InvoiceResponse:
+      type: object
+      required: [invoice]
+      properties:
+        invoice:
+          $ref: "#/components/schemas/Invoice"
+    InvoiceItem:
+      type: object
+      required: [id, description, quantity, unit_price, amount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        quantity:
+          type: integer
+        unit_price:
+          type: number
+        amount:
+          type: number
+    Payment:
+      type: object
+      required: [id, invoice_id, amount, payment_date, payment_method, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        invoice_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+        payment_date:
+          type: string
+          format: date
+        payment_method:
+          type: string
+          enum: [CASH, CARD, UPI, BANK_TRANSFER, OTHER]
+        reference:
+          type: string
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    InvoiceDetails:
+      type: object
+      required: [invoice, customer, items, payments]
+      properties:
+        invoice:
+          $ref: "#/components/schemas/Invoice"
+        customer:
+          $ref: "#/components/schemas/Customer"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvoiceItem"
+        payments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Payment"
+    PaymentResponse:
+      type: object
+      required: [payment, invoice]
+      properties:
+        payment:
+          $ref: "#/components/schemas/Payment"
+        invoice:
+          $ref: "#/components/schemas/Invoice"
+    Notification:
+      type: object
+      required: [id, type, title, message, is_read, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        title:
+          type: string
+        message:
+          type: string
+        is_read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+    NotificationResponse:
+      type: object
+      required: [notification]
+      properties:
+        notification:
+          $ref: "#/components/schemas/Notification"
+    AnalyticsSummary:
+      type: object
+      required: [metrics, trends, popular_services, top_customers, technician_workload]
+      properties:
+        metrics:
+          type: object
+          required: [customers, services, appointments, upcoming_appointments, completed_appointments, cancelled_appointments, no_show_appointments, total_technicians, active_technicians, total_invoices, paid_invoices, pending_invoices, total_payments, total_invoiced_amount, total_revenue, outstanding_balance]
+          properties:
+            customers:
+              type: integer
+            services:
+              type: integer
+            appointments:
+              type: integer
+            upcoming_appointments:
+              type: integer
+            completed_appointments:
+              type: integer
+            cancelled_appointments:
+              type: integer
+            no_show_appointments:
+              type: integer
+            total_technicians:
+              type: integer
+            active_technicians:
+              type: integer
+            total_invoices:
+              type: integer
+            paid_invoices:
+              type: integer
+            pending_invoices:
+              type: integer
+            total_payments:
+              type: integer
+            total_invoiced_amount:
+              type: number
+            total_revenue:
+              type: number
+            outstanding_balance:
+              type: number
+        trends:
+          type: object
+          required: [start_month, end_month, months]
+          properties:
+            start_month:
+              type: string
+              pattern: "^\\d{4}-\\d{2}$"
+            end_month:
+              type: string
+              pattern: "^\\d{4}-\\d{2}$"
+            months:
+              type: array
+              items:
+                type: object
+                required: [month, revenue, appointments]
+                properties:
+                  month:
+                    type: string
+                    pattern: "^\\d{4}-\\d{2}$"
+                  revenue:
+                    type: number
+                  appointments:
+                    type: integer
+        popular_services:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsServiceInsight"
+        top_customers:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsCustomerInsight"
+        technician_workload:
+          type: array
+          items:
+            $ref: "#/components/schemas/TechnicianWorkload"
+    AnalyticsServiceInsight:
+      type: object
+      required: [id, name, bookings]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        bookings:
+          type: integer
+    AnalyticsCustomerInsight:
+      type: object
+      required: [id, name, bookings, last_booking_date]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        bookings:
+          type: integer
+        last_booking_date:
+          type: string
+          format: date
+    TechnicianWorkload:
+      type: object
+      required: [id, name, bookings, active_bookings, completed_bookings]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        bookings:
+          type: integer
+        active_bookings:
+          type: integer
+        completed_bookings:
+          type: integer
+    AnalyticsActivity:
+      type: object
+      required: [range, start_date, end_date, days]
+      properties:
+        range:
+          type: string
+          enum: [today, last_7_days, last_30_days, current_month]
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        days:
+          type: array
+          items:
+            type: object
+            required: [date, revenue, appointments, completed_appointments, cancelled_appointments, no_show_appointments]
+            properties:
+              date:
+                type: string
+                format: date
+              revenue:
+                type: number
+              appointments:
+                type: integer
+              completed_appointments:
+                type: integer
+              cancelled_appointments:
+                type: integer
+              no_show_appointments:
+                type: integer
+    Error:
+      type: object
+      required: [error]
+      additionalProperties: false
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          additionalProperties: false
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+    Pagination:
+      type: object
+      required: [page, limit, total, total_pages]
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+    CustomerList:
+      type: object
+      required: [customers, pagination]
+      properties:
+        customers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Customer"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    BookingList:
+      type: object
+      required: [bookings, pagination]
+      properties:
+        bookings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Booking"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    AppointmentList:
+      type: object
+      required: [appointments, pagination]
+      properties:
+        appointments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Appointment"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    TechnicianList:
+      type: object
+      required: [technicians, pagination]
+      properties:
+        technicians:
+          type: array
+          items:
+            $ref: "#/components/schemas/Technician"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    InvoiceList:
+      type: object
+      required: [invoices, pagination]
+      properties:
+        invoices:
+          type: array
+          items:
+            $ref: "#/components/schemas/Invoice"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    NotificationList:
+      type: object
+      required: [notifications, pagination]
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/Notification"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+  responses:
+    BadRequest:
+      description: Invalid input.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Authentication required or token invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Resource not found in the authenticated organization.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: Business-rule or uniqueness conflict.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    RateLimited:
+      description: Rate limit exceeded.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    CustomerList:
+      description: Customer list.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CustomerList"
+    BookingList:
+      description: Booking list.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BookingList"
+    AppointmentList:
+      description: Appointment list.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AppointmentList"
+    TechnicianList:
+      description: Technician list.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TechnicianList"
+    InvoiceList:
+      description: Invoice list.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/InvoiceList"
+    NotificationList:
+      description: Notification list for the authenticated user.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NotificationList"

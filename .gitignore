@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+.serveflow-dev/
+node_modules/
+dist/
+bin/
+coverage/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

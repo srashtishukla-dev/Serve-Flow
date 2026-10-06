@@ -7,6 +7,7 @@ import apiClient from '../services/api/client'
 
 export default function Dashboard() {
   const { user, logout } = useAuth()
+  const isAdmin = user.role === 'ADMIN'
   const navigate = useNavigate()
   const [organization, setOrganization] = useState(null)
   const [organizationError, setOrganizationError] = useState('')
@@ -35,6 +36,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     let isActive = true
+    if (!isAdmin) {
+      setAnalyticsLoading(false)
+      return undefined
+    }
     setAnalyticsLoading(true)
     setAnalyticsError('')
     apiClient.get('/analytics/summary')
@@ -66,12 +71,13 @@ export default function Dashboard() {
       <header className="dashboard-header">
         <Logo />
         <div className="dashboard-header__actions">
-          <Link className="button button--outline" to="/services"><Wrench size={16} /> Services</Link>
-          <Link className="button button--outline" to="/customers"><UsersRound size={16} /> Customers</Link>
-          <Link className="button button--outline" to="/bookings"><CalendarDays size={16} /> Bookings</Link>
+          {isAdmin && <Link className="button button--outline" to="/services"><Wrench size={16} /> Services</Link>}
+          {isAdmin && <Link className="button button--outline" to="/customers"><UsersRound size={16} /> Customers</Link>}
+          {isAdmin && <Link className="button button--outline" to="/bookings"><CalendarDays size={16} /> Bookings</Link>}
           <Link className="button button--outline" to="/appointments"><CalendarRange size={16} /> Appointments</Link>
-          <Link className="button button--outline" to="/technicians"><UserRound size={16} /> Technicians</Link>
-          <Link className="button button--outline" to="/invoices"><Receipt size={16} /> Invoices</Link>
+          {isAdmin && <Link className="button button--outline" to="/technicians"><UserRound size={16} /> Technicians</Link>}
+          {isAdmin && <Link className="button button--outline" to="/invoices"><Receipt size={16} /> Invoices</Link>}
+          {user.role === 'CUSTOMER' && <Link className="button button--outline" to="/invoices"><Receipt size={16} /> My invoices</Link>}
           <Link className="button button--outline" to="/notifications"><Bell size={16} /> Notifications</Link>
           <button className="button button--outline dashboard-logout" onClick={handleLogout} type="button">
             <LogOut size={16} /> Log out
@@ -104,7 +110,7 @@ export default function Dashboard() {
             </>
           )}
         </div>
-        <section aria-label="Workspace analytics" className="dashboard-analytics">
+        {isAdmin && <section aria-label="Workspace analytics" className="dashboard-analytics">
           {analyticsLoading ? (
             <p className="dashboard-state" role="status">Loading workspace analytics...</p>
           ) : analyticsError ? (
@@ -144,7 +150,7 @@ export default function Dashboard() {
               </div>
             </>
           )}
-        </section>
+        </section>}
         {organizationError && <p className="auth-notice auth-notice--error" role="alert">{organizationError}</p>}
       </section>
     </main>

@@ -1,0 +1,86 @@
+name: Verify
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: serveflow_test
+          POSTGRES_USER: serveflow
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U serveflow -d serveflow_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      APP_ENV: test
+      EMAIL_PROVIDER: disabled
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5433
+      POSTGRES_DB: serveflow_test
+      POSTGRES_USER: serveflow
+      SERVEFLOW_TEST_DATABASE: serveflow_test
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - name: Download Go dependencies
+        working-directory: backend
+        run: go mod download
+      - name: Generate ephemeral test-only secrets
+        run: |
+          echo "POSTGRES_PASSWORD=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          echo "JWT_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+      - name: Test backend
+        working-directory: backend
+        run: go test -count=1 ./...
+      - name: Vet backend
+        working-directory: backend
+        run: go vet ./...
+      - name: Build backend
+        working-directory: backend
+        run: go build ./...
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Validate OpenAPI
+        working-directory: frontend
+        run: npx --yes @redocly/cli lint --extends=minimal ../backend/openapi.yaml
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build

@@ -3,6 +3,7 @@ import { ArrowLeft, Eye, FileText, Pencil, Plus, Receipt, X } from 'lucide-react
 import { Link, useNavigate } from 'react-router-dom'
 import InvoiceForm from '../components/layout/InvoiceForm'
 import Button from '../components/ui/Button'
+import CustomerInvoices from './CustomerInvoices'
 import Input from '../components/ui/Input'
 import Logo from '../components/ui/Logo'
 import { useAuth } from '../context/AuthContext'
@@ -11,6 +12,11 @@ import apiClient from '../services/api/client'
 const emptyPayment = { amount: '', payment_date: localDate(), payment_method: 'CASH', reference: '', notes: '' }
 
 export default function Invoices() {
+  const { user } = useAuth()
+  return user?.role === 'CUSTOMER' ? <CustomerInvoices /> : <AdminInvoices />
+}
+
+function AdminInvoices() {
   const { logout } = useAuth()
   const navigate = useNavigate()
   const [invoices, setInvoices] = useState([])
@@ -260,7 +266,7 @@ export default function Invoices() {
       {outstanding.length > 0 && (
         <aside aria-label="Outstanding invoice summary" className="invoice-outstanding-summary">
           <span>{outstanding.length} outstanding {outstanding.length === 1 ? 'invoice' : 'invoices'}</span>
-          <strong>Balance due: {displayMoney(outstanding.reduce((sum, invoice) => sum + parseCents(String(invoice.balance_due)), 0n))}</strong>
+          <strong>Balance due: {displayCents(outstanding.reduce((sum, invoice) => sum + parseCents(String(invoice.balance_due)), 0n))}</strong>
         </aside>
       )}
 
@@ -414,4 +420,8 @@ function displayMoney(value) {
   const amount = String(value ?? '0')
   const [whole, fraction = ''] = amount.split('.')
   return `INR ${whole}.${fraction.padEnd(2, '0').slice(0, 2)}`
+}
+
+function displayCents(cents) {
+  return `INR ${cents / 100n}.${String(cents % 100n).padStart(2, '0')}`
 }
